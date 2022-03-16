@@ -133,7 +133,7 @@ module.exports = (userOptions = {}) => {
    * Expose only if metricsApp set
    */
   if (metricsApp) {
-    routeApp.get(metricsPath, async (req, res, next) => {
+    metricsApp.get(metricsPath, async (req, res, next) => {
       if (typeof options.authenticate === 'function') {
         let result = null;
         try {
