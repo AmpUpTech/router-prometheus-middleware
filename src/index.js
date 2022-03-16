@@ -1,4 +1,3 @@
-const express = require('express');
 const Prometheus = require('prom-client');
 const ResponseTime = require('response-time');
 
@@ -17,7 +16,6 @@ const {
 const defaultOptions = {
   metricsPath: '/metrics',
   metricsApp: null,
-  app: null,
   authenticate: null,
   collectDefaultMetrics: true,
   collectGCMetrics: false,
@@ -37,12 +35,7 @@ module.exports = (userOptions = {}) => {
   const originalLabels = ['route', 'method', 'status'];
   options.customLabels = new Set([...originalLabels, ...options.customLabels]);
   options.customLabels = [...options.customLabels];
-  const { metricsPath, metricsApp, app = express(), normalizeStatus } = options;
-
-  try {
-    app.disable('x-powered-by');
-  } catch (_) {}
-  
+  const { metricsPath, metricsApp, normalizeStatus } = options;
 
   const requestDuration = requestDurationGenerator(
     options.customLabels,
@@ -135,31 +128,31 @@ module.exports = (userOptions = {}) => {
     }
   }
 
-  app.use(redMiddleware);
-
   /**
    * Metrics route to be used by prometheus to scrape metrics
+   * Expose only if metricsApp set
    */
-  const routeApp = metricsApp || app;
-  routeApp.get(metricsPath, async (req, res, next) => {
-    if (typeof options.authenticate === 'function') {
-      let result = null;
-      try {
-        result = await options.authenticate(req);
-      } catch (err) {
-        // treat errors as failures to authenticate
+  if (metricsApp) {
+    routeApp.get(metricsPath, async (req, res, next) => {
+      if (typeof options.authenticate === 'function') {
+        let result = null;
+        try {
+          result = await options.authenticate(req);
+        } catch (err) {
+          // treat errors as failures to authenticate
+        }
+  
+        // the requester failed to authenticate, then return next, so we don't
+        // hint at the existance of this route
+        if (!result) {
+          return next();
+        }
       }
+  
+      return res.end(await Prometheus.register.metrics());
+    });
+  }
 
-      // the requester failed to authenticate, then return next, so we don't
-      // hint at the existance of this route
-      if (!result) {
-        return next();
-      }
-    }
 
-    res.set('Content-Type', Prometheus.register.contentType);
-    return res.end(await Prometheus.register.metrics());
-  });
-
-  return app;
+  return redMiddleware;
 };
