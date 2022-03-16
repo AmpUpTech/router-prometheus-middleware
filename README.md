@@ -1,4 +1,4 @@
-# Express Prometheus Middleware
+# Router Prometheus Middleware
 
 [![npm](https://img.shields.io/npm/v/express-prometheus-middleware.svg)](https://www.npmjs.com/package/express-prometheus-middleware)
 [![Dependency Status](https://david-dm.org/joao-fontenele/express-prometheus-middleware.svg)](https://david-dm.org/joao-fontenele/express-prometheus-middleware)
@@ -6,7 +6,11 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/express-prometheus-middleware/community)
 
-This is a middleware for express servers, that expose metrics for prometheus.
+This is a fork from joao-fontenele/express-prometheus-middleware to make it compatible with [pillarjs/router](https://github.com/pillarjs/router)
+
+Below is the documentation from original repo.
+
+This is a middleware for express/router servers, that expose metrics for prometheus.
 
 The metrics exposed allows to calculate common RED (Request, Error rate, Duration of requests), and USE (Utilisation, Error rate, and Saturation), metrics
 
