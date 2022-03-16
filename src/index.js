@@ -17,6 +17,7 @@ const {
 const defaultOptions = {
   metricsPath: '/metrics',
   metricsApp: null,
+  app: null,
   authenticate: null,
   collectDefaultMetrics: true,
   collectGCMetrics: false,
@@ -36,10 +37,12 @@ module.exports = (userOptions = {}) => {
   const originalLabels = ['route', 'method', 'status'];
   options.customLabels = new Set([...originalLabels, ...options.customLabels]);
   options.customLabels = [...options.customLabels];
-  const { metricsPath, metricsApp, normalizeStatus } = options;
+  const { metricsPath, metricsApp, app = express(), normalizeStatus } = options;
 
-  const app = express();
-  app.disable('x-powered-by');
+  try {
+    app.disable('x-powered-by');
+  } catch (_) {}
+  
 
   const requestDuration = requestDurationGenerator(
     options.customLabels,
