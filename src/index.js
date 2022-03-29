@@ -6,6 +6,7 @@ const {
   requestDurationGenerator,
   requestLengthGenerator,
   responseLengthGenerator,
+  requestInProgressGauge,
 } = require('./metrics');
 
 const {
@@ -30,7 +31,7 @@ const defaultOptions = {
   normalizeStatus: true,
 };
 
-module.exports = (userOptions = {}) => {
+module.exports = (userOptions = {}) => (app) => {
   const options = { ...defaultOptions, ...userOptions };
   const originalLabels = ['route', 'method', 'status'];
   options.customLabels = new Set([...originalLabels, ...options.customLabels]);
@@ -153,6 +154,23 @@ module.exports = (userOptions = {}) => {
     });
   }
 
-
-  return redMiddleware;
+  if (app) {
+    app.use((req, res, next) => {
+      const { originalUrl, method } = req;
+      // will replace ids from the route with `#val` placeholder this serves to
+      // measure the same routes, e.g., /image/id1, and /image/id2, will be
+      // treated as the same route
+      const route = normalizePath(originalUrl, options.extraMasks);
+  
+      const g = requestInProgressGauge.labels({
+        method, route
+      })
+      g.inc()
+      next()
+  
+      g.dec()
+    })
+  
+    app.use(redMiddleware);
+  }
 };
