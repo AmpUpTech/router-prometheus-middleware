@@ -6,7 +6,7 @@ const {
   requestDurationGenerator,
   requestLengthGenerator,
   responseLengthGenerator,
-  requestInProgressGauge,
+  requestInProgressGenerator,
 } = require('./metrics');
 
 const {
@@ -53,6 +53,12 @@ module.exports = (userOptions = {}) => (app) => {
     options.prefix,
   );
   const responseLength = responseLengthGenerator(
+    options.customLabels,
+    options.responseLengthBuckets,
+    options.prefix,
+  );
+
+  const inprogressRequests = requestInProgressGenerator(
     options.customLabels,
     options.responseLengthBuckets,
     options.prefix,
@@ -162,7 +168,7 @@ module.exports = (userOptions = {}) => (app) => {
       // treated as the same route
       const route = normalizePath(originalUrl, options.extraMasks);
   
-      const g = requestInProgressGauge.labels({
+      const g = inprogressRequests.labels({
         method, route
       })
       g.inc()

@@ -4,7 +4,7 @@ const Prometheus = require('prom-client');
  * @param prefix - metrics name prefix
  * request counter
  */
- function requestInProgressGauge(labelNames, prefix = '') {
+ function requestInProgressGenerator(labelNames, prefix = '') {
   return new Prometheus.Gauge({
     name: `${prefix}http_requests_in_progress`,
     help: 'Gauge for in-progress requests',
@@ -67,7 +67,7 @@ function responseLengthGenerator(labelNames, buckets, prefix = '') {
 }
 
 module.exports = {
-  requestInProgressGauge,
+  requestInProgressGenerator,
   requestCountGenerator,
   requestDurationGenerator,
   requestLengthGenerator,
